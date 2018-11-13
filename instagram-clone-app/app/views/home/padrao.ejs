@@ -29,10 +29,11 @@
 				return false;
 			});
 
-			$('#btn-publicar').click(function(){
+			$('#btn-publicar').click(function () {
 				// criar um formato
 				var formData = new FormData();
-				var arquivos = document.getElementById('arquivo').Files[0];
+
+				var arquivos = document.getElementById('arquivo').files[0];
 				var titulo = document.getElementById('titulo').value;
 
 				formData.append('arquivo', arquivos);
@@ -42,8 +43,8 @@
 				var xmlHttp = new XMLHttpRequest();
 
 				//verificar mudancas do estado
-				xmlHttp.onreadystatechange = function() {
-					if(xmlHttp.readyState == 4) {
+				xmlHttp.onreadystatechange = function () {
+					if (xmlHttp.readyState == 4) {
 						var response = xmlHttp.responseText;
 						document.getElementById('mensagem').innerHTML = response;
 					}

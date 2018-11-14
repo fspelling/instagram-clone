@@ -1,91 +1,169 @@
 <!DOCTYPE HTML>
 <html lang="pt-br">
-	<head>
-		<meta charset="UTF-8">
 
-		<title>Instagram Clone - WEB</title>
-		
-		<!-- JQuery -->
-		<script src="http://code.jquery.com/jquery-3.1.1.min.js"></script>
+<head>
+	<meta charset="UTF-8">
 
-		<!-- bootstrap - link cdn -->
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-	
-		<!-- incluindo css -->
-		<link href="css/style.css" rel="stylesheet">
+	<title>Instagram Clone - WEB</title>
 
-		<script>
-			$(document).ready(function(){
+	<!-- JQuery -->
+	<script src="http://code.jquery.com/jquery-3.1.1.min.js"></script>
 
-				$('#btn_incluir').click(function(){
-					$('#container_timeline').hide();
-					$('#container_form').show();
-				});
+	<!-- bootstrap - link cdn -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 
-				$('#btn-cancelar-publicacao').click(function(){
-					$('#container_timeline').show();
-					$('#container_form').hide();
-					return false;
-				});
+	<!-- incluindo css -->
+	<link href="css/style.css" rel="stylesheet">
 
-				$('#btn-publicar').click(function(){
+	<script>
+		$(document).ready(function () {
 
-					// criar um formData
-					var formData = new FormData();
+			$('#btn_incluir').click(function () {
+				$('#container_timeline').hide();
+				$('#container_form').show();
+			});
 
-					var arquivo = document.getElementById('arquivo').files[0];
-					var titulo = document.getElementById('titulo').value;
+			$('#btn-cancelar-publicacao').click(function () {
+				$('#container_timeline').show();
+				$('#container_form').hide();
+				return false;
+			});
 
-					formData.append("arquivo", arquivo);
-					formData.append("titulo", titulo);
+			$('#btn-publicar').click(function () {
+				// criar um formData
+				var formData = new FormData();
 
-					// criar xmlhttprequest
-					var xhr = new XMLHttpRequest();
+				var arquivo = document.getElementById('arquivo').files[0];
+				var titulo = document.getElementById('titulo').value;
 
-					// verificar as mudanças de estado
-					xhr.onreadystatechange = function(){
-						if(xhr.readyState == 4){
-							var resposta = xhr.responseText;
-							document.getElementById('mensagem').innerHTML = resposta;
+				formData.append("arquivo", arquivo);
+				formData.append("titulo", titulo);
+
+				// criar xmlhttprequest
+				var xhr = new XMLHttpRequest();
+
+				// verificar as mudanças de estado
+				xhr.onreadystatechange = function () {
+					if (xhr.readyState == 4) {
+						document.getElementById('mensagem').innerHTML = xhr.responseText;
+					}
+				}
+
+				// fazer envio do request
+				xhr.open("POST", "http://localhost:8080/api");
+				xhr.send(formData);
+			});
+
+			carregarPostagens();
+		});
+
+		function carregarPostagens() {
+			// criar xmlhttprequest
+			var xhr = new XMLHttpRequest();
+
+			// fazer envio do request
+			xhr.open("GET", "http://localhost:8080/api");
+
+			xhr.onload = function () {
+				if (xhr.status === 200) {
+					var data = $.parseJSON(xhr.responseText);
+
+					for (let postagem of data) {
+						$('#container_timeline').append(`
+						<div class="publicacao">
+							<span class="titulo">
+								${postagem.titulo}
+							</span>
+							<img src="http://localhost:8080/images/${postagem.url_image}"/>
+							<div class="comentarios" id="comentario_${postagem._id}"></div>
+							<div class="comentar">
+								<input type="text" class="form-control input comentario" placeholder="digite seu comentario" id="postagem_${postagem._id}"/>
+								<button class="btn btn-default btn_postagens" type="button" value="${postagem._id}">Comentar</button>
+							</div>
+						</div>`);
+
+						if (postagem.comentarios != undefined) {
+							for (let coments of postagem.comentarios) {
+								$(`#comentario_${postagem._id}`).append(`
+								<div class="txt_comentario">
+									<button class="btn btn-danger btn_remover_postagens" value="${coments.id_comentario}" type="button">X</button>
+									${coments.comentario}
+								</div>`);
+							}
 						}
 					}
 
-					// fazer envio do nosso request
-					xhr.open("POST", "http://localhost:8080/api");
-					xhr.send(formData);
+					$('.btn_postagens').click(function () {
+						var id = this.value;
+						var input = 'postagem_' + id;
+						var comentario = $(`#${input}`).val();
 
-				});
+						// criar xmlhttprequest
+						var xhr = new XMLHttpRequest();
 
-			});
-		</script>
+						// fazer envio do request
+						xhr.open("PUT", `http://localhost:8080/api/${id}`);
+						xhr.setRequestHeader('content-type', 'application/json');
 
-	</head>
+						xhr.onload = function () {
+							if (xhr.status === 200)
+								window.document.location.href = '/home'
+						}
 
-	<body>
+						xhr.send(JSON.stringify({ comentario: comentario }));
+					});
 
-		<nav class="navbar navbar-default">
-			<div class="container">
-				<div class="col-md-12">
-					<div class="container-fluid">
-						<img alt="Instagram Clone - Versão WEB" src="images/logo2.jpg" class="logo2">
-						<img alt="Incluir" src="images/incluir.jpg" class="pull-right btn-incluir" id="btn_incluir">						
-					</div>
+					$('.btn_remover_postagens').click(function () {
+						var idComentario = this.value;
+
+						// criar xmlhttprequest
+						var xhr = new XMLHttpRequest();
+
+						// fazer envio do request
+						xhr.open("DELETE", `http://localhost:8080/api/${idComentario}`);
+
+						xhr.onload = function () {
+							if (xhr.status === 200)
+								window.document.location.href = '/home'
+						}
+
+						xhr.send();
+					});
+				}
+			}
+
+			xhr.send();
+		}
+	</script>
+</head>
+
+<body>
+
+	<nav class="navbar navbar-default">
+		<div class="container">
+			<div class="col-md-12">
+				<div class="container-fluid">
+					<img alt="Instagram Clone - Versão WEB" src="images/logo2.jpg" class="logo2">
+					<img alt="Incluir" src="images/incluir.jpg" class="pull-right btn-incluir" id="btn_incluir">
 				</div>
 			</div>
-		</nav>
-
-		<div class="container">
-			<div class="col-md-2"></div>
-			<div class="col-md-8" id="container_timeline"></div>
-			
 		</div>
+	</nav>
+
+	<div class="container">
+		<div class="col-md-2"></div>
+		<div class="col-md-8" id="container_timeline"></div>
+
+	</div>
 
 
-		<div class="container" style="display:none" id="container_form">
-			<div class="panel panel-default">
+	<div class="container" style="display:none" id="container_form">
+		<div class="panel panel-default">
 
-			<div class="panel-heading"><h4>Publicar uma foto</h4></div>
-			
+			<div class="panel-heading">
+				<h4>Publicar uma foto</h4>
+			</div>
+
 			<div class="panel-body">
 				<div class="form-group">
 					<input type="file" name="arquivo" id="arquivo" class="form-control">
@@ -102,5 +180,6 @@
 				<div id="mensagem"></div>
 			</div>
 		</div>
-	</body>
+</body>
+
 </html>

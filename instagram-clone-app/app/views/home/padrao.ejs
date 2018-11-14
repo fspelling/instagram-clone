@@ -1,91 +1,91 @@
 <!DOCTYPE HTML>
 <html lang="pt-br">
+	<head>
+		<meta charset="UTF-8">
 
-<head>
-	<meta charset="UTF-8">
+		<title>Instagram Clone - WEB</title>
+		
+		<!-- JQuery -->
+		<script src="http://code.jquery.com/jquery-3.1.1.min.js"></script>
 
-	<title>Instagram Clone - WEB</title>
+		<!-- bootstrap - link cdn -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	
+		<!-- incluindo css -->
+		<link href="css/style.css" rel="stylesheet">
 
-	<!-- JQuery -->
-	<script src="http://code.jquery.com/jquery-3.1.1.min.js"></script>
+		<script>
+			$(document).ready(function(){
 
-	<!-- bootstrap - link cdn -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+				$('#btn_incluir').click(function(){
+					$('#container_timeline').hide();
+					$('#container_form').show();
+				});
 
-	<!-- incluindo css -->
-	<link href="css/style.css" rel="stylesheet">
+				$('#btn-cancelar-publicacao').click(function(){
+					$('#container_timeline').show();
+					$('#container_form').hide();
+					return false;
+				});
 
-	<script>
-		$(document).ready(function () {
+				$('#btn-publicar').click(function(){
 
-			$('#btn_incluir').click(function () {
-				$('#container_timeline').hide();
-				$('#container_form').show();
-			});
+					// criar um formData
+					var formData = new FormData();
 
-			$('#btn-cancelar-publicacao').click(function () {
-				$('#container_timeline').show();
-				$('#container_form').hide();
-				return false;
-			});
+					var arquivo = document.getElementById('arquivo').files[0];
+					var titulo = document.getElementById('titulo').value;
 
-			$('#btn-publicar').click(function () {
-				// criar um formato
-				var formData = new FormData();
+					formData.append("arquivo", arquivo);
+					formData.append("titulo", titulo);
 
-				var arquivos = document.getElementById('arquivo').files[0];
-				var titulo = document.getElementById('titulo').value;
+					// criar xmlhttprequest
+					var xhr = new XMLHttpRequest();
 
-				formData.append('arquivo', arquivos);
-				formData.append('titulo', titulo);
-
-				// criar xmlhttprequest
-				var xmlHttp = new XMLHttpRequest();
-
-				//verificar mudancas do estado
-				xmlHttp.onreadystatechange = function () {
-					if (xmlHttp.readyState == 4) {
-						var response = xmlHttp.responseText;
-						document.getElementById('mensagem').innerHTML = response;
+					// verificar as mudanças de estado
+					xhr.onreadystatechange = function(){
+						if(xhr.readyState == 4){
+							var resposta = xhr.responseText;
+							document.getElementById('mensagem').innerHTML = resposta;
+						}
 					}
-				}
 
-				// fazer envio do request
-				xmlHttp.open('POST', 'localhost:8080/api');
-				xmlHttp.send(formData);
+					// fazer envio do nosso request
+					xhr.open("POST", "http://localhost:8080/api");
+					xhr.send(formData);
+
+				});
+
 			});
-		});
-	</script>
+		</script>
 
-</head>
+	</head>
 
-<body>
+	<body>
 
-	<nav class="navbar navbar-default">
-		<div class="container">
-			<div class="col-md-12">
-				<div class="container-fluid">
-					<img alt="Instagram Clone - Versão WEB" src="images/logo2.jpg" class="logo2">
-					<img alt="Incluir" src="images/incluir.jpg" class="pull-right btn-incluir" id="btn_incluir">
+		<nav class="navbar navbar-default">
+			<div class="container">
+				<div class="col-md-12">
+					<div class="container-fluid">
+						<img alt="Instagram Clone - Versão WEB" src="images/logo2.jpg" class="logo2">
+						<img alt="Incluir" src="images/incluir.jpg" class="pull-right btn-incluir" id="btn_incluir">						
+					</div>
 				</div>
 			</div>
+		</nav>
+
+		<div class="container">
+			<div class="col-md-2"></div>
+			<div class="col-md-8" id="container_timeline"></div>
+			
 		</div>
-	</nav>
-
-	<div class="container">
-		<div class="col-md-2"></div>
-		<div class="col-md-8" id="container_timeline"></div>
-
-	</div>
 
 
-	<div class="container" style="display:none" id="container_form">
-		<div class="panel panel-default">
+		<div class="container" style="display:none" id="container_form">
+			<div class="panel panel-default">
 
-			<div class="panel-heading">
-				<h4>Publicar uma foto</h4>
-			</div>
-
+			<div class="panel-heading"><h4>Publicar uma foto</h4></div>
+			
 			<div class="panel-body">
 				<div class="form-group">
 					<input type="file" name="arquivo" id="arquivo" class="form-control">
@@ -102,6 +102,5 @@
 				<div id="mensagem"></div>
 			</div>
 		</div>
-</body>
-
+	</body>
 </html>
